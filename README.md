@@ -1,3 +1,9 @@
+# Disclaimer
+
+Thi repo was originally from jog_arm (now it is within Moveit: https://github.com/ros-planning/moveit/tree/master/moveit_experimental/moveit_jog_arm). 
+
+
+--------------------------
 ## Jog Arm
 
 #### Quick Start Guide for UR5 example
@@ -56,4 +62,4 @@ If you see a warning about "close to singularity", try changing the direction of
 Run tests from the jog\_arm folder:
 
     catkin run_tests --no-deps --this
-# moveit_jog_arm
+
