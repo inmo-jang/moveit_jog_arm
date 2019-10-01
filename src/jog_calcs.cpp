@@ -309,12 +309,12 @@ bool JogCalcs::cartesianJogCalcs(geometry_msgs::TwistStamped& cmd, JogArmShared&
     return false;
 
   // Include a velocity estimate for velocity-controlled robots
-  Eigen::VectorXd joint_vel(delta_theta_ / parameters_.publish_period);
+  Eigen::VectorXd joint_vel(delta_theta_ / parameters_.publish_period); // Compute the delta joint velocity corresponding to delta_theta_
 
-  lowPassFilterVelocities(joint_vel);
+  lowPassFilterVelocities(joint_vel); // Update joint_vel into jt_state_
   lowPassFilterPositions();
 
-  outgoing_command_ = composeOutgoingMessage(jt_state_);
+  outgoing_command_ = composeOutgoingMessage(jt_state_); // Compose command input depending on controller type (e.g. pos based or vel based)
 
   // If close to a collision or a singularity, decelerate
   applyVelocityScaling(shared_variables, mutex, outgoing_command_, delta_theta_,
