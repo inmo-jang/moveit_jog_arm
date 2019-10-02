@@ -25,6 +25,8 @@
   <depend>rosparam_shortcuts</depend>
   <depend>tf2_ros</depend>
 
+  <depend>rain_unity</depend>
+
   <!-- <exec_depend>joy_teleop</exec_depend>
 
   <test_depend>rostest</test_depend>

@@ -303,7 +303,7 @@ bool JogCalcs::cartesianJogCalcs(geometry_msgs::TwistStamped& cmd, JogArmShared&
 
   enforceJointVelocityLimits(delta_theta_);
 
-  ROS_INFO_STREAM("Delta_theta : " << delta_theta_  << "\n");
+  // ROS_INFO_STREAM("Delta_theta : " << delta_theta_  << "\n");
   
   if (!addJointIncrements(jt_state_, delta_theta_))
     return false;
