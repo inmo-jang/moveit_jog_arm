@@ -89,7 +89,7 @@ def get_Euler(X_current, X_ref): # Get Euler Angles in Global Frame
     Euler = np.array([roll, pitch, yaw])
     return Euler
 
-def leap_to_twist_callback():
+def leap_to_twist_callback(Coordinate):
     global time_pre_cbLEAP, palm_frame_pre, del_Euler_stack # For computing del_Euler     
     global twist_pub_, LeapMsg_from_unity  
     
@@ -105,23 +105,35 @@ def leap_to_twist_callback():
             if (LeapMsg_from_unity.right_hand.is_present is True):
 
                 twist = TwistStamped()
+                if Coordinate == "Unity":
+                    # Coordination transformation from Unity to ROS
+                    # // e.g. ROS (x,y,z) = Unity (z, -x, y)
+                    palm_velocity_from_unity = copy.deepcopy(LeapMsg_from_unity.right_hand.palm_velocity)
+                    palm_normal_from_unity = copy.deepcopy(LeapMsg_from_unity.right_hand.palm_normal)
+                    palm_direction_from_unity = copy.deepcopy(LeapMsg_from_unity.right_hand.palm_direction) 
 
-                # Coordination transformation from Unity to ROS
-                # // e.g. ROS (x,y,z) = Unity (z, -x, y)
-                palm_velocity_from_unity = copy.deepcopy(LeapMsg_from_unity.right_hand.palm_velocity)
-                palm_normal_from_unity = copy.deepcopy(LeapMsg_from_unity.right_hand.palm_normal)
-                palm_direction_from_unity = copy.deepcopy(LeapMsg_from_unity.right_hand.palm_direction) 
+
+                    palm_velocity = (palm_velocity_from_unity[2], -palm_velocity_from_unity[0], palm_velocity_from_unity[1])
+                    palm_normal = np.array([palm_normal_from_unity.z,-palm_normal_from_unity.x, palm_normal_from_unity.y])
+                    palm_direction = np.array([palm_direction_from_unity.z,-palm_direction_from_unity.x, palm_direction_from_unity.y])
+                
+
+                elif Coordinate == "ROS":
+                    # Assuming that the information has been already transformed. 
+                    palm_velocity_from_ros = copy.deepcopy(LeapMsg_from_unity.right_hand.palm_velocity)
+                    palm_normal_from_ros = copy.deepcopy(LeapMsg_from_unity.right_hand.palm_normal)
+                    palm_direction_from_ros = copy.deepcopy(LeapMsg_from_unity.right_hand.palm_direction) 
 
 
-                palm_velocity = (palm_velocity_from_unity[2], -palm_velocity_from_unity[0], palm_velocity_from_unity[1])
-                palm_normal = np.array([palm_normal_from_unity.z,-palm_normal_from_unity.x, palm_normal_from_unity.y])
-                palm_direction = np.array([palm_direction_from_unity.z,-palm_direction_from_unity.x, palm_direction_from_unity.y])
-            
+                    palm_velocity = (palm_velocity_from_ros[0], palm_velocity_from_ros[1], palm_velocity_from_ros[2])
+                    palm_normal = np.array([palm_normal_from_ros.x,palm_normal_from_ros.y, palm_normal_from_ros.z])
+                    palm_direction = np.array([palm_direction_from_ros.x,palm_direction_from_ros.y, palm_direction_from_ros.z])
+                
 
                 # Get Delta_Position
                 twist.twist.linear.x = palm_velocity[0]*time_to_reach*scale_factor_position
                 twist.twist.linear.y = palm_velocity[1]*time_to_reach*scale_factor_position
-                twist.twist.linear.z = palm_velocity[2]*time_to_reach*scale_factor_position
+                twist.twist.linear.z = palm_velocity[2]*time_to_reach*scale_factor_position                    
 
                 # Get Delta_Euler
                 dir_cross_nor_vec_ = np.cross(palm_direction,palm_normal)
@@ -157,26 +169,31 @@ def leap_to_twist_callback():
 
 
 
-def main():
+def main(Arg):
     global twist_pub_
 
+    if (Arg=='Unity') or (Arg=='ROS'):
+        try:
+            rospy.init_node("leapmotion_to_twist", anonymous=True, disable_signals=True)
+                
+            twist_pub_ = rospy.Publisher('/jog_server/delta_jog_cmds',TwistStamped,queue_size=1)
 
-    try:
-        rospy.init_node("leapmotion_to_twist", anonymous=True, disable_signals=True)
-            
-        twist_pub_ = rospy.Publisher('/jog_server/delta_jog_cmds',TwistStamped,queue_size=1)
+            rospy.Subscriber("/rain/status",RainMsg, callback_Mode, queue_size=1)     
+            rospy.Subscriber("/rain/leap_motion",LeapMsg, callback_Leap, queue_size=1)
 
-        rospy.Subscriber("/rain/status",RainMsg, callback_Mode, queue_size=1)     
-        rospy.Subscriber("/rain/leap_motion",LeapMsg, callback_Leap, queue_size=1)
-
-        leap_to_twist_callback()
-        # leap_to_twist()
-    
-    except KeyboardInterrupt:
-        rospy.signal_shutdown("KeyboardInterrupt")
-        raise
-    
+            print("Taking Leap Motion in ", Arg, " Coordinate")
+            leap_to_twist_callback(Arg)
+            # leap_to_twist()
+        
+        except KeyboardInterrupt:
+            rospy.signal_shutdown("KeyboardInterrupt")
+            raise
+    else:
+        rospy.signal_shutdown("Wrong Argument: It should be either 'ROS' or 'Unity'[default]")
 
 
-if __name__ == '__main__':     
-    main()
+if __name__ == '__main__':  
+    if len(sys.argv) < 2:        
+        main('Unity')
+    else:   
+        main(sys.argv[1])
