@@ -9,7 +9,7 @@ command_in_type: "speed_units" # "unitless"> in the range [-1:1], as if from joy
 scale: # Only used if command_in_type=="unitless"
   linear:  1  # Max linear velocity. Meters per publish_period. Units is [m/s]
   rotational:  1 # Max angular velocity. Rads per publish_period. Units is [rad/s]
-  joint: 1  # Max joint angular/linear velocity. Rads or Meters per publish period. Units is [rad/s] or [m/s]. This also works in "speed_units" mode as well
+  joint: 2  # Max joint angular/linear velocity. Rads or Meters per publish period. Units is [rad/s] or [m/s]. This also works in "speed_units" mode as well
 low_pass_filter_coeff: 2.  # Larger --> trust the filtered data more, trust the measurements less.
 
 ## Properties of outgoing commands
