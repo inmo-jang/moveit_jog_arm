@@ -62,19 +62,12 @@ add_executable(xbox_to_twist
 add_dependencies(xbox_to_twist ${catkin_EXPORTED_TARGETS})
 target_link_libraries(xbox_to_twist ${catkin_LIBRARIES})
 
-add_executable(leapmotion_to_twist
-  src/teleop_examples/leapmotion_to_twist.cpp
-)
-add_dependencies(leapmotion_to_twist ${catkin_EXPORTED_TARGETS})
-target_link_libraries(leapmotion_to_twist ${catkin_LIBRARIES})
-
 install(
   TARGETS
     jog_server
     spacenav_to_twist
     xbox_to_twist
-    leapmotion_to_twist
-  RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
+    RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 )
 
 install(DIRECTORY include/ DESTINATION ${CATKIN_GLOBAL_INCLUDE_DESTINATION})
