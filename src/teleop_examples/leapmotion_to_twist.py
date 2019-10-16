@@ -22,8 +22,8 @@ import copy
 num_stack_palm = 20 # Stack for Delta of Euler Angle of Hand
 publish_rate = 250
 time_to_reach = 0.008
-scale_factor_orientation = 100# 100
-scale_factor_position = 100 #100
+scale_factor_orientation = 100*8*2# 100
+scale_factor_position = 100*8*2 #100
 incoming_command_timeout = 0.1 # (sec)
 ###############################################################
 ###############################################################
@@ -105,14 +105,14 @@ def leap_to_twist_callback(Coordinate):
             if (LeapMsg_from_unity.right_hand.is_present is True):
 
                 twist = TwistStamped()
+
+                # Coordination transformation from Unity to ROS
+                palm_velocity_from_unity = copy.deepcopy(LeapMsg_from_unity.right_hand.palm_velocity)
+                palm_normal_from_unity = copy.deepcopy(LeapMsg_from_unity.right_hand.palm_normal)
+                palm_direction_from_unity = copy.deepcopy(LeapMsg_from_unity.right_hand.palm_direction)                 
+
                 if Coordinate == "Unity":
-                    # Coordination transformation from Unity to ROS
                     # // e.g. ROS (x,y,z) = Unity (z, -x, y)
-                    palm_velocity_from_unity = copy.deepcopy(LeapMsg_from_unity.right_hand.palm_velocity)
-                    palm_normal_from_unity = copy.deepcopy(LeapMsg_from_unity.right_hand.palm_normal)
-                    palm_direction_from_unity = copy.deepcopy(LeapMsg_from_unity.right_hand.palm_direction) 
-
-
                     palm_velocity = (palm_velocity_from_unity[2], -palm_velocity_from_unity[0], palm_velocity_from_unity[1])
                     palm_normal = np.array([palm_normal_from_unity.z,-palm_normal_from_unity.x, palm_normal_from_unity.y])
                     palm_direction = np.array([palm_direction_from_unity.z,-palm_direction_from_unity.x, palm_direction_from_unity.y])
@@ -120,15 +120,15 @@ def leap_to_twist_callback(Coordinate):
 
                 elif Coordinate == "ROS":
                     # Assuming that the information has been already transformed. 
-                    palm_velocity_from_ros = copy.deepcopy(LeapMsg_from_unity.right_hand.palm_velocity)
-                    palm_normal_from_ros = copy.deepcopy(LeapMsg_from_unity.right_hand.palm_normal)
-                    palm_direction_from_ros = copy.deepcopy(LeapMsg_from_unity.right_hand.palm_direction) 
-
-
                     palm_velocity = (palm_velocity_from_ros[0], palm_velocity_from_ros[1], palm_velocity_from_ros[2])
                     palm_normal = np.array([palm_normal_from_ros.x,palm_normal_from_ros.y, palm_normal_from_ros.z])
                     palm_direction = np.array([palm_direction_from_ros.x,palm_direction_from_ros.y, palm_direction_from_ros.z])
                 
+                elif Coordinate == "demo1":
+                    # // For Bare-Hand Demo // e.g. ROS (x,y,z) = Unity (-x, -z, y)
+                    palm_velocity = (-palm_velocity_from_unity[0], -palm_velocity_from_unity[2], palm_velocity_from_unity[1])
+                    palm_normal = np.array([-palm_normal_from_unity.x,-palm_normal_from_unity.z, palm_normal_from_unity.y])
+                    palm_direction = np.array([-palm_direction_from_unity.x,-palm_direction_from_unity.z, palm_direction_from_unity.y])
 
                 # Get Delta_Position
                 twist.twist.linear.x = palm_velocity[0]*time_to_reach*scale_factor_position
@@ -172,7 +172,7 @@ def leap_to_twist_callback(Coordinate):
 def main(Arg):
     global twist_pub_
 
-    if (Arg=='Unity') or (Arg=='ROS'):
+    if (Arg=='Unity') or (Arg=='ROS') or (Arg=='demo1'):
         try:
             rospy.init_node("leapmotion_to_twist", anonymous=True, disable_signals=True)
                 
