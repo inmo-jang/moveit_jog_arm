@@ -19,11 +19,11 @@ import copy
 
 ###############################################################
 ###############################################################
-num_stack_palm = 20 # Stack for Delta of Euler Angle of Hand
-publish_rate = 250
+num_stack_palm = 30 # Stack for Delta of Euler Angle of Hand
+publish_rate = 125
 time_to_reach = 0.008
-scale_factor_orientation = 100*8*2# 100
-scale_factor_position = 100*8*2 #100
+scale_factor_orientation = 100*5# 100
+scale_factor_position = 100*5 #100
 incoming_command_timeout = 0.1 # (sec)
 ###############################################################
 ###############################################################
