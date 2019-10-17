@@ -688,14 +688,14 @@ Eigen::VectorXd JogCalcs::scaleCartesianCommand(const geometry_msgs::TwistStampe
   // Apply user-defined scaling if inputs are unitless [-1:1]
   if (parameters_.command_in_type == "unitless")
   {
-    ROS_INFO_STREAM("Unitness: " << parameters_.linear_scale << " " << parameters_.rotational_scale << "\n");
+    // ROS_INFO_STREAM("Unitness: " << parameters_.linear_scale << " " << parameters_.rotational_scale << "\n");
     result[0] = parameters_.linear_scale * parameters_.publish_period * command.twist.linear.x;
     result[1] = parameters_.linear_scale * parameters_.publish_period * command.twist.linear.y;
     result[2] = parameters_.linear_scale * parameters_.publish_period * command.twist.linear.z;
     result[3] = parameters_.rotational_scale * parameters_.publish_period * command.twist.angular.x;
     result[4] = parameters_.rotational_scale * parameters_.publish_period * command.twist.angular.y;
     result[5] = parameters_.rotational_scale * parameters_.publish_period * command.twist.angular.z;
-    ROS_INFO_STREAM("Result: " << result << "\n");    
+    // ROS_INFO_STREAM("Result: " << result << "\n");    
   }
   // Otherwise, commands are in m/s and rad/s
   else if (parameters_.command_in_type == "speed_units")
